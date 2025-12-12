@@ -3,8 +3,18 @@ package slowsql
 import (
 	"bufio"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/codeboyzhou/sql-copilot/slowsql/strconst"
+)
+
+const (
+	TimePrefix         = "# Time:"
+	UserHostPrefix     = "# User@Host:"
+	QueryTimePrefix    = "# Query_time:"
+	SetTimestampPrefix = "SET timestamp="
 )
 
 type SlowQuery struct {
@@ -22,54 +32,76 @@ func ParseSlowLog(filepath string, threshold float64) ([]SlowQuery, error) {
 
 	var slowQueries []SlowQuery
 	var currentQuery SlowQuery
-	var isSQLBlock bool
 	var sqlLines []string
+	inSQLBlock := false
+
+	// Precompile regex patterns for efficiency
+	queryTimePattern := regexp.MustCompile(`Query_time:\s+([0-9.]+)`)
+	rowsExaminedPattern := regexp.MustCompile(`Rows_examined:\s+(\d+)`)
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 
-		if strings.HasPrefix(line, "# Time:") || strings.HasPrefix(line, "# User@Host:") {
+		// Skip unnecessary header lines
+		if strings.HasPrefix(line, TimePrefix) || strings.HasPrefix(line, UserHostPrefix) || strings.HasPrefix(line, SetTimestampPrefix) {
 			continue
 		}
 
-		if strings.HasPrefix(line, "#") {
-			if strings.HasPrefix(line, "# Query_time:") {
-				parts := strings.Fields(line)
-				partsLength := len(parts)
-				for i, part := range parts {
-					if part == "Query_time:" && i+1 < partsLength {
-						if queryTime, err := strconv.ParseFloat(parts[i+1], 64); err == nil {
-							currentQuery.QueryTime = queryTime
-						}
-					}
-					if part == "Rows_examined:" && i+1 < partsLength {
-						if rowsExamined, err := strconv.ParseInt(parts[i+1], 10, 64); err == nil {
-							currentQuery.RowsExamined = rowsExamined
-						}
-					}
-				}
-			}
-			isSQLBlock = false
-		} else if line != "" && !strings.HasPrefix(line, "SET timestamp=") {
-			isSQLBlock = true
+		// Process query metadata lines
+		if strings.HasPrefix(line, QueryTimePrefix) {
+			extractQueryTimeAndSet(&currentQuery, queryTimePattern, line)
+			extractRowsExaminedAndSet(&currentQuery, rowsExaminedPattern, line)
+			inSQLBlock = false
+			continue
+		}
+
+		// Skip other comment lines
+		if strings.HasPrefix(line, strconst.HashSymbol) {
+			inSQLBlock = false
+			continue
+		}
+
+		// Process SQL lines
+		if line != strconst.Empty {
+			inSQLBlock = true
 			sqlLines = append(sqlLines, line)
-		} else if isSQLBlock && (line == "" || strings.HasPrefix(line, "SET timestamp=")) {
-			if currentQuery.QueryTime >= threshold {
-				currentQuery.SQL = strings.Join(sqlLines, " ")
-				slowQueries = append(slowQueries, currentQuery)
-			}
+		} else if inSQLBlock {
+			// End of SQL block
+			finalizeQuery(&currentQuery, sqlLines, threshold, &slowQueries)
 			currentQuery = SlowQuery{}
-			isSQLBlock = false
 			sqlLines = nil
+			inSQLBlock = false
 		}
 	}
 
-	// check if the SQL block is the last line of the file
-	if isSQLBlock && currentQuery.QueryTime >= threshold {
-		currentQuery.SQL = strings.Join(sqlLines, " ")
-		slowQueries = append(slowQueries, currentQuery)
+	// Handle case where file ends without empty line
+	if inSQLBlock {
+		finalizeQuery(&currentQuery, sqlLines, threshold, &slowQueries)
 	}
 
 	return slowQueries, nil
+}
+
+func extractQueryTimeAndSet(query *SlowQuery, queryTimePattern *regexp.Regexp, line string) {
+	if matches := queryTimePattern.FindStringSubmatch(line); len(matches) > 1 {
+		if queryTime, err := strconv.ParseFloat(matches[1], 64); err == nil {
+			query.QueryTime = queryTime
+		}
+	}
+}
+
+func extractRowsExaminedAndSet(query *SlowQuery, rowsExaminedPattern *regexp.Regexp, line string) {
+	if matches := rowsExaminedPattern.FindStringSubmatch(line); len(matches) > 1 {
+		if rowsExamined, err := strconv.ParseInt(matches[1], 10, 64); err == nil {
+			query.RowsExamined = rowsExamined
+		}
+	}
+}
+
+func finalizeQuery(query *SlowQuery, sqlLines []string, threshold float64, slowQueries *[]SlowQuery) {
+	if query.QueryTime >= threshold {
+		query.SQL = strings.Join(sqlLines, strconst.Space)
+		*slowQueries = append(*slowQueries, *query)
+	}
 }
