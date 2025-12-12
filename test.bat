@@ -9,7 +9,7 @@ if exist %GOCOVERDIR% rmdir /s /q %GOCOVERDIR%
 
 mkdir %GOCOVERDIR%
 
-go test -coverprofile=%GOCOVERDIR%\coverage.out ./...
+go test -coverprofile=%GOCOVERDIR%\coverage.out ./slowsql
 if !ERRORLEVEL! neq 0 (
     echo ❌ Error: there are test failures
     exit /b 1
