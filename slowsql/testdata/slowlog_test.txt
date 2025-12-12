@@ -1,0 +1,13 @@
+# Time: 2025-12-11T23:30:00.123456Z
+# User@Host: app[app] @ localhost []
+# Thread_id: 12345  Schema: mydb  QC_hit: No
+# Query_time: 2.345  Lock_time: 0.001  Rows_sent: 1000  Rows_examined: 500000
+SET timestamp=1702336200;
+SELECT * FROM orders WHERE user_id = 123 AND created > '2025-01-01';
+
+# Time: 2025-12-12T23:30:00.123456Z
+# User@Host: app[app] @ localhost []
+# Thread_id: 12345  Schema: mydb  QC_hit: No
+# Query_time: 1.234  Lock_time: 0.001  Rows_sent: 100  Rows_examined: 100000
+SET timestamp=1702336600;
+SELECT * FROM orders WHERE user_id = 456 AND created > '2025-10-01';
