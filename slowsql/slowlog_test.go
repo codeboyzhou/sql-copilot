@@ -8,8 +8,7 @@ import (
 
 func TestParseSlowLog(t *testing.T) {
 	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
+		name      string
 		filepath  string
 		threshold float64
 		want      []slowsql.SlowQuery
