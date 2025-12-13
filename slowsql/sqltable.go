@@ -1,40 +1,37 @@
 package slowsql
 
 import (
-	"regexp"
-	"strings"
+	"fmt"
+	"slices"
+
+	"vitess.io/vitess/go/vt/sqlparser"
 
 	"github.com/codeboyzhou/sql-copilot/strconst"
 )
 
-func ExtractTableNames(sql string) []string {
-	sqlKeywordFromPattern := regexp.MustCompile(`(?i)FROM\s+([\w.]+)`)
-	sqlKeywordJoinPattern := regexp.MustCompile(`(?i)JOIN\s+([\w.]+)`)
-
-	fromMatches := sqlKeywordFromPattern.FindAllStringSubmatch(sql, -1)
-	joinMatches := sqlKeywordJoinPattern.FindAllStringSubmatch(sql, -1)
-
-	var tableNames []string
-
-	for _, match := range fromMatches {
-		if len(match) > 1 {
-			tableName := match[1]
-			if strings.Contains(tableName, strconst.DOT) {
-				tableName = strings.Split(tableName, strconst.DOT)[1]
-			}
-			tableNames = append(tableNames, tableName)
-		}
+func ExtractTableNamesFromSQL(sql string) (tableNames []string, err error) {
+	parser, err := sqlparser.New(sqlparser.Options{})
+	if err != nil {
+		return nil, fmt.Errorf("error new sql parser: %w", err)
 	}
 
-	for _, match := range joinMatches {
-		if len(match) > 1 {
-			tableName := match[1]
-			if strings.Contains(tableName, strconst.DOT) {
-				tableName = strings.Split(tableName, strconst.DOT)[1]
-			}
-			tableNames = append(tableNames, tableName)
-		}
+	stmt, err := parser.Parse(sql)
+	if err != nil {
+		return nil, fmt.Errorf("error while parsing sql [%s]: %w", sql, err)
 	}
 
-	return tableNames
+	walkErr := sqlparser.Walk(func(node sqlparser.SQLNode) (kontinue bool, err error) {
+		switch n := node.(type) {
+		case sqlparser.TableName:
+			if name := n.Name.String(); name != strconst.Empty && !slices.Contains(tableNames, name) {
+				tableNames = append(tableNames, name)
+			}
+		}
+		return true, nil
+	}, stmt)
+	if walkErr != nil {
+		return nil, fmt.Errorf("error while walking sql AST: %w", walkErr)
+	}
+
+	return tableNames, nil
 }

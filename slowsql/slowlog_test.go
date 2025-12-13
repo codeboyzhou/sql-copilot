@@ -1,6 +1,7 @@
 package slowsql_test
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/codeboyzhou/sql-copilot/slowsql"
@@ -15,7 +16,7 @@ func TestParseSlowLog(t *testing.T) {
 		wantErr   bool
 	}{
 		{
-			name:      "should parse successfully and get 2 slow query",
+			name:      "should parse success",
 			filepath:  "testdata/slowlog_test.txt",
 			threshold: 1.0,
 			want: []slowsql.SlowQuery{
@@ -47,30 +48,14 @@ func TestParseSlowLog(t *testing.T) {
 
 			if gotErr != nil {
 				if !tt.wantErr {
-					t.Errorf("ParseSlowLog(%s) failed, we don't want error, but got: %v", tt.filepath, gotErr)
+					t.Errorf("ParseSlowLog(%s) failed, we don't want error, but got error: %v", tt.filepath, gotErr)
 				}
 				// nothing to verify if we want error
 				return
 			}
 
-			if len(got) != len(tt.want) {
-				t.Errorf("ParseSlowLog(%s), len(got) = %d, but len(want) = %d", tt.filepath, len(got), len(tt.want))
-				return
-			}
-
-			for i := range got {
-				if got[i].QueryTime != tt.want[i].QueryTime {
-					t.Errorf("ParseSlowLog(%s), got[%d].QueryTime = %f, but want[%d].QueryTime = %f",
-						tt.filepath, i, got[i].QueryTime, i, tt.want[i].QueryTime)
-				}
-				if got[i].RowsExamined != tt.want[i].RowsExamined {
-					t.Errorf("ParseSlowLog(%s), got[%d].RowsExamined = %d, but want[%d].RowsExamined = %d",
-						tt.filepath, i, got[i].RowsExamined, i, tt.want[i].RowsExamined)
-				}
-				if got[i].SQL != tt.want[i].SQL {
-					t.Errorf("ParseSlowLog(%s), got[%d].SQL = %s, but want[%d].SQL = %s",
-						tt.filepath, i, got[i].SQL, i, tt.want[i].SQL)
-				}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ParseSlowLog(%s), got = %v, but want = %v", tt.filepath, got, tt.want)
 			}
 		})
 	}

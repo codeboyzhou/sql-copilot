@@ -24,7 +24,7 @@ type SlowQuery struct {
 	SQL          string
 }
 
-func ParseSlowLog(filepath string, threshold float64) (queries []SlowQuery, err error) {
+func ParseSlowLog(filepath string, threshold float64) (slowQueries []SlowQuery, err error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
@@ -36,7 +36,6 @@ func ParseSlowLog(filepath string, threshold float64) (queries []SlowQuery, err 
 		}
 	}()
 
-	var slowQueries []SlowQuery
 	var currentQuery SlowQuery
 	var sqlLines []string
 	inSQLBlock := false
