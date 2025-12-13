@@ -24,6 +24,11 @@ func main() {
 
 	task := os.Args[1]
 	switch task {
+	case "help":
+		showHelp()
+		os.Exit(0)
+	case "lint":
+		runLint()
 	case "test":
 		runTest(len(os.Args) == 3 && os.Args[2] == "-html")
 	case "benchmark":
@@ -59,6 +64,16 @@ func run(cmd string, args ...string) error {
 	}
 	fmt.Print(string(output))
 	return nil
+}
+
+func runLint() {
+	fmt.Printf("%s Running:  go fmt\n", EmojiRunning)
+	run("go", "fmt")
+	fmt.Printf("%s Finished: go fmt\n", EmojiSuccess)
+
+	fmt.Printf("%s Running:  gofumpt -w .\n", EmojiRunning)
+	run("gofumpt", "-w", ".")
+	fmt.Printf("%s Finished: gofumpt -w .\n", EmojiSuccess)
 }
 
 func runTest(openHtmlInBrowser bool) {
