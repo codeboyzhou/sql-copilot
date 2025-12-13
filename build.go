@@ -97,23 +97,36 @@ func runLint() {
 
 func runTest(openHtmlInBrowser bool) {
 	if _, err := os.Stat(TestCoverageDir); os.IsExist(err) {
-		os.RemoveAll(TestCoverageDir)
+		if err := os.RemoveAll(TestCoverageDir); err != nil {
+			fmt.Printf("%s Error: %v\n", EmojiError, err)
+			os.Exit(1)
+		}
 	}
-	os.MkdirAll(TestCoverageDir, 0o755)
+
+	if err := os.MkdirAll(TestCoverageDir, 0o755); err != nil {
+		fmt.Printf("%s Error: %v\n", EmojiError, err)
+		os.Exit(1)
+	}
 
 	coverprofile := fmt.Sprintf("%s/coverage.out", TestCoverageDir)
 	if err := run("go", "test", "-coverprofile", coverprofile, "./slowsql"); err != nil {
-		fmt.Printf("%s Error: %s\n", EmojiError, err)
+		fmt.Printf("%s Error: %v\n", EmojiError, err)
 		os.Exit(1)
 	}
 
 	coverhtml := fmt.Sprintf("%s/coverage.html", TestCoverageDir)
-	run("go", "tool", "cover", "-html", coverprofile, "-o", coverhtml)
+	if err := run("go", "tool", "cover", "-html", coverprofile, "-o", coverhtml); err != nil {
+		fmt.Printf("%s Error: %v\n", EmojiError, err)
+		os.Exit(1)
+	}
 	fmt.Printf("%s Test coverage report generated: %s\n", EmojiSuccess, coverhtml)
 
 	if openHtmlInBrowser {
 		if runtime.GOOS == "windows" {
-			run("cmd", "/c", "start", "", coverhtml)
+			if err := run("cmd", "/c", "start", "", coverhtml); err != nil {
+				fmt.Printf("%s Error: %v\n", EmojiError, err)
+				os.Exit(1)
+			}
 		} else {
 			fmt.Printf("%s To view the coverage report, use: go run build.go test -html\n", EmojiTips)
 		}
@@ -123,7 +136,7 @@ func runTest(openHtmlInBrowser bool) {
 func runBenchmark(bench string) {
 	fmt.Printf("%s Running benchmark...It may take a while\n", EmojiRunning)
 	if err := run("go", "test", "-bench", bench, "-benchtime", "5s", "./slowsql"); err != nil {
-		fmt.Printf("%s Error: %s\n", EmojiError, err)
+		fmt.Printf("%s Error: %v\n", EmojiError, err)
 		os.Exit(1)
 	}
 	fmt.Printf("%s Benchmark completed successfully\n", EmojiSuccess)

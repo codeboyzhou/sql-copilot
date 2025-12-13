@@ -2,6 +2,7 @@ package slowsql
 
 import (
 	"bufio"
+	"errors"
 	"os"
 	"regexp"
 	"strconv"
@@ -23,12 +24,17 @@ type SlowQuery struct {
 	SQL          string
 }
 
-func ParseSlowLog(filepath string, threshold float64) ([]SlowQuery, error) {
+func ParseSlowLog(filepath string, threshold float64) (queries []SlowQuery, err error) {
 	file, err := os.Open(filepath)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+
+	defer func() {
+		if closeErr := file.Close(); closeErr != nil {
+			err = errors.Join(err, closeErr)
+		}
+	}()
 
 	var slowQueries []SlowQuery
 	var currentQuery SlowQuery
