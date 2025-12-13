@@ -111,6 +111,14 @@ func runTools() {
 }
 
 func runLint() {
+	fmt.Printf("%s Running:  go mod tidy\n", EmojiRunning)
+	// should never fail but just in case
+	if err := run("go", "mod", "tidy"); err != nil {
+		fmt.Printf("%s Error: go mod tidy failed\n", EmojiError)
+		os.Exit(1)
+	}
+	fmt.Printf("%s Finished: go mod tidy\n", EmojiSuccess)
+
 	fmt.Printf("%s Running:  go fmt\n", EmojiRunning)
 	// should never fail but just in case
 	if err := run("go", "fmt"); err != nil {
