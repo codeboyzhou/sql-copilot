@@ -1,3 +1,6 @@
+//go:build tools
+// +build tools
+
 package main
 
 import (
@@ -16,6 +19,12 @@ const (
 	EmojiRunning = "⏳"
 )
 
+const (
+	GoFumptVersion   = "v0.9.2"
+	GoImportsVersion = "v0.40.0"
+	GolangciVersion  = "v2.7.2"
+)
+
 func main() {
 	if len(os.Args) < 2 {
 		showHelp()
@@ -27,6 +36,8 @@ func main() {
 	case "help":
 		showHelp()
 		os.Exit(0)
+	case "tools":
+		runTools()
 	case "lint":
 		runLint()
 	case "test":
@@ -68,6 +79,32 @@ func run(cmd string, args ...string) error {
 	}
 
 	return nil
+}
+
+func runTools() {
+	fmt.Printf("%s Installing gofumpt (%s)...\n", EmojiRunning, GoFumptVersion)
+	gofumpt := fmt.Sprintf("mvdan.cc/gofumpt@%s", GoFumptVersion)
+	if err := run("go", "install", gofumpt); err != nil {
+		fmt.Printf("%s Error: failed to install gofumpt (%s)\n", EmojiError, GoFumptVersion)
+		os.Exit(1)
+	}
+	fmt.Printf("%s Successfully installed gofumpt (%s)\n", EmojiSuccess, GoFumptVersion)
+
+	fmt.Printf("%s Installing goimports (%s)...\n", EmojiRunning, GoImportsVersion)
+	goimports := fmt.Sprintf("golang.org/x/tools/cmd/goimports@%s", GoImportsVersion)
+	if err := run("go", "install", goimports); err != nil {
+		fmt.Printf("%s Error: failed to install goimports (%s)\n", EmojiError, GoImportsVersion)
+		os.Exit(1)
+	}
+	fmt.Printf("%s Successfully installed goimports (%s)\n", EmojiSuccess, GoImportsVersion)
+
+	fmt.Printf("%s Installing golangci-lint (%s)...\n", EmojiRunning, GolangciVersion)
+	golangci := fmt.Sprintf("github.com/golangci/golangci-lint/v2/cmd/golangci-lint@%s", GolangciVersion)
+	if err := run("go", "install", golangci); err != nil {
+		fmt.Printf("%s Error: failed to install golangci-lint (%s)\n", EmojiError, GolangciVersion)
+		os.Exit(1)
+	}
+	fmt.Printf("%s Successfully installed golangci-lint (%s)\n", EmojiSuccess, GolangciVersion)
 }
 
 func runLint() {
