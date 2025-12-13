@@ -58,22 +58,41 @@ func showHelp() {
 func run(cmd string, args ...string) error {
 	command := exec.Command(cmd, args...)
 	output, err := command.CombinedOutput()
+
+	if len(output) > 0 {
+		fmt.Print(string(output))
+	}
+
 	if err != nil {
-		fmt.Printf("%s Error: %s\n", EmojiError, err)
 		return err
 	}
-	fmt.Print(string(output))
+
 	return nil
 }
 
 func runLint() {
 	fmt.Printf("%s Running:  go fmt\n", EmojiRunning)
-	run("go", "fmt")
+	// should never fail but just in case
+	if err := run("go", "fmt"); err != nil {
+		fmt.Printf("%s Error: go fmt failed\n", EmojiError)
+		os.Exit(1)
+	}
 	fmt.Printf("%s Finished: go fmt\n", EmojiSuccess)
 
 	fmt.Printf("%s Running:  gofumpt -w .\n", EmojiRunning)
-	run("gofumpt", "-w", ".")
+	// should never fail but just in case
+	if err := run("gofumpt", "-w", "."); err != nil {
+		fmt.Printf("%s Error: gofumpt -w . failed\n", EmojiError)
+		os.Exit(1)
+	}
 	fmt.Printf("%s Finished: gofumpt -w .\n", EmojiSuccess)
+
+	fmt.Printf("%s Running:  golangci-lint run ./... --config .golangci.yml\n", EmojiRunning)
+	if err := run("golangci-lint", "run", "./...", "--config", ".golangci.yml"); err != nil {
+		fmt.Printf("%s Error: golangci-lint failed\n", EmojiError)
+		os.Exit(1)
+	}
+	fmt.Printf("%s Finished: golangci-lint run ./... --config .golangci.yml\n", EmojiSuccess)
 }
 
 func runTest(openHtmlInBrowser bool) {
