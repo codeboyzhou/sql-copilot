@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/codeboyzhou/sql-copilot/slowsql/strconst"
+	"github.com/codeboyzhou/sql-copilot/strconst"
 )
 
 const (
@@ -50,7 +50,10 @@ func ParseSlowLog(filepath string, threshold float64) (queries []SlowQuery, err 
 		line := strings.TrimSpace(scanner.Text())
 
 		// Skip unnecessary header lines
-		if strings.HasPrefix(line, TimePrefix) || strings.HasPrefix(line, UserHostPrefix) || strings.HasPrefix(line, SetTimestampPrefix) {
+		hasTimePrefix := strings.HasPrefix(line, TimePrefix)
+		hasUserHostPrefix := strings.HasPrefix(line, UserHostPrefix)
+		hasSetTimestampPrefix := strings.HasPrefix(line, SetTimestampPrefix)
+		if hasTimePrefix || hasUserHostPrefix || hasSetTimestampPrefix {
 			continue
 		}
 
