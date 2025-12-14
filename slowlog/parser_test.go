@@ -1,10 +1,8 @@
-package slowsql_test
+package slowlog
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/codeboyzhou/sql-copilot/slowsql"
 )
 
 func TestParseSlowLog(t *testing.T) {
@@ -12,14 +10,14 @@ func TestParseSlowLog(t *testing.T) {
 		name      string
 		filepath  string
 		threshold float64
-		want      []slowsql.SlowQuery
+		want      []SlowQuery
 		wantErr   bool
 	}{
 		{
 			name:      "should parse success",
 			filepath:  "testdata/slowlog_test.txt",
 			threshold: 1.0,
-			want: []slowsql.SlowQuery{
+			want: []SlowQuery{
 				{
 					QueryTime:    2.345,
 					RowsExamined: 500000,
@@ -37,14 +35,14 @@ func TestParseSlowLog(t *testing.T) {
 			name:      "should parse error",
 			filepath:  "testdata/slowlog_test_fake.txt",
 			threshold: 1.0,
-			want:      []slowsql.SlowQuery{},
+			want:      []SlowQuery{},
 			wantErr:   true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := slowsql.ParseSlowLog(tt.filepath, tt.threshold)
+			got, gotErr := ParseSlowLog(tt.filepath, tt.threshold)
 
 			if gotErr != nil {
 				if !tt.wantErr {

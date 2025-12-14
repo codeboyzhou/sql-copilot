@@ -1,4 +1,4 @@
-package slowsql
+package sqlmeta
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/codeboyzhou/sql-copilot/strconst"
 )
 
-func ExtractTableNamesFromSQL(sql string) (tableNames []string, err error) {
+func ExtractTableNames(sql string) (tableNames []string, err error) {
 	parser, err := sqlparser.New(sqlparser.Options{})
 	if err != nil {
 		return nil, fmt.Errorf("error new sql parser: %w", err)

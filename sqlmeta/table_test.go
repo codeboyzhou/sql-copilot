@@ -1,4 +1,4 @@
-package slowsql
+package sqlmeta
 
 import (
 	"reflect"
@@ -58,18 +58,18 @@ func TestExtractTableNames(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, gotErr := ExtractTableNamesFromSQL(tt.sql)
+			got, gotErr := ExtractTableNames(tt.sql)
 
 			if gotErr != nil {
 				if !tt.wantErr {
-					t.Errorf("ExtractTableNamesFromSQL(%s) failed, we don't want error, but got error: %v", tt.sql, gotErr)
+					t.Errorf("ExtractTableNames(%s) failed, we don't want error, but got error: %v", tt.sql, gotErr)
 				}
 				// nothing to verify if we want error
 				return
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ExtractTableNamesFromSQL(%s), got = %v, but want = %v", tt.sql, got, tt.want)
+				t.Errorf("ExtractTableNames(%s), got = %v, but want = %v", tt.sql, got, tt.want)
 			}
 		})
 	}

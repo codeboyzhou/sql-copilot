@@ -1,4 +1,4 @@
-package slowsql
+package slowlog
 
 import (
 	"bufio"

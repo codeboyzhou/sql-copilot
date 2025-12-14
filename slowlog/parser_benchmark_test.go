@@ -1,11 +1,9 @@
-package slowsql_test
+package slowlog
 
 import (
 	"fmt"
 	"os"
 	"testing"
-
-	"github.com/codeboyzhou/sql-copilot/slowsql"
 )
 
 func BenchmarkParseSlowLog(b *testing.B) {
@@ -13,7 +11,7 @@ func BenchmarkParseSlowLog(b *testing.B) {
 	threshold := 1.0
 
 	for b.Loop() {
-		_, err := slowsql.ParseSlowLog(filepath, threshold)
+		_, err := ParseSlowLog(filepath, threshold)
 		if err != nil {
 			b.Fatalf("BenchmarkParseSlowLog failed: %v", err)
 		}
@@ -31,7 +29,7 @@ func BenchmarkParseSlowLogLarge(b *testing.B) {
 	threshold := 0.5 // Lower threshold to include more queries
 
 	for b.Loop() {
-		_, err := slowsql.ParseSlowLog(largeFile, threshold)
+		_, err := ParseSlowLog(largeFile, threshold)
 		if err != nil {
 			b.Fatalf("BenchmarkParseSlowLogLarge failed: %v", err)
 		}

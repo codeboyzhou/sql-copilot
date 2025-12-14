@@ -157,7 +157,7 @@ func runTest(openHtmlInBrowser bool) {
 	}
 
 	coverprofile := fmt.Sprintf("%s/coverage.out", TestCoverageDir)
-	if err := run("go", "test", "-v", "-coverprofile", coverprofile, "./slowsql"); err != nil {
+	if err := run("go", "test", "-v", "-coverprofile", coverprofile, "./..."); err != nil {
 		fmt.Printf("%s Error: there are test failures\n", EmojiError)
 		os.Exit(1)
 	}
@@ -183,7 +183,7 @@ func runTest(openHtmlInBrowser bool) {
 
 func runBenchmark(bench string) {
 	fmt.Printf("%s Running benchmark...It may take a while\n", EmojiRunning)
-	if err := run("go", "test", "-bench", bench, "-benchtime", "5s", "./slowsql"); err != nil {
+	if err := run("go", "test", "-bench", bench, "-benchtime", "5s", "./..."); err != nil {
 		fmt.Printf("%s Error: %v\n", EmojiError, err)
 		os.Exit(1)
 	}
