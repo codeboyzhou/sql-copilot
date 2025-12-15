@@ -1,13 +1,11 @@
-package sqlmeta
+package sql
 
 import (
 	"fmt"
-	"regexp"
 	"slices"
 
 	"vitess.io/vitess/go/vt/sqlparser"
 
-	"github.com/codeboyzhou/sql-copilot/internal/db"
 	"github.com/codeboyzhou/sql-copilot/strconst"
 )
 
@@ -36,18 +34,4 @@ func ExtractTableNames(sql string) (tableNames []string, err error) {
 	}
 
 	return tableNames, nil
-}
-
-func GetTableSchema(querier db.Querier, tableName string) (createTableSQL string, err error) {
-	// validate table name
-	if !regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(tableName) {
-		return strconst.Empty, fmt.Errorf("invalid table name: %s", tableName)
-	}
-
-	query := fmt.Sprintf("SHOW CREATE TABLE `%s`", tableName)
-	row := querier.QueryRow(query)
-	if err := row.Scan(&createTableSQL); err != nil {
-		return strconst.Empty, fmt.Errorf("error while scanning show create table result: %w", err)
-	}
-	return createTableSQL, nil
 }
