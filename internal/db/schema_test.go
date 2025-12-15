@@ -15,9 +15,9 @@ const mockCreateTableSQL = `
 		INDEX idx_email (email),
 	)`
 
-type mockRow struct{}
+type schemaMockRow struct{}
 
-func (row *mockRow) Scan(dest ...any) error {
+func (row *schemaMockRow) Scan(dest ...any) error {
 	// mock the scan result
 	if len(dest) > 0 {
 		// dest[0] should be a pointer to string
@@ -29,13 +29,13 @@ func (row *mockRow) Scan(dest ...any) error {
 	return nil
 }
 
-type mockQuerier struct{}
+type schemaMockQuerier struct{}
 
-func (querier *mockQuerier) QueryRow(query string, args ...any) Row {
-	return &mockRow{}
+func (querier *schemaMockQuerier) QueryRow(query string, args ...any) Row {
+	return &schemaMockRow{}
 }
 
-func TestGetTableSchema(t *testing.T) {
+func TestShowCreateTableSQL(t *testing.T) {
 	tests := []struct {
 		name      string
 		querier   Querier
@@ -45,14 +45,14 @@ func TestGetTableSchema(t *testing.T) {
 	}{
 		{
 			name:      "invalid table name",
-			querier:   &mockQuerier{},
+			querier:   &schemaMockQuerier{},
 			tableName: "invalid#table#name",
 			want:      strconst.Empty,
 			wantErr:   true,
 		},
 		{
 			name:      "table example user",
-			querier:   &mockQuerier{},
+			querier:   &schemaMockQuerier{},
 			tableName: "table_example_user",
 			want:      mockCreateTableSQL,
 			wantErr:   false,
