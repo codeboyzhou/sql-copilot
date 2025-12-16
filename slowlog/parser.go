@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/codeboyzhou/sql-copilot/internal/db/sql"
 	"github.com/codeboyzhou/sql-copilot/strconst"
 )
 
@@ -110,6 +111,7 @@ func extractRowsExaminedAndSet(query *SlowQuery, rowsExaminedPattern *regexp.Reg
 func finalizeQuery(query *SlowQuery, sqlLines []string, threshold float64, slowQueries *[]SlowQuery) {
 	if query.QueryTime >= threshold {
 		query.SQL = strings.Join(sqlLines, strconst.Space)
+		query.SQL = sql.NormalizeSQL(query.SQL)
 		*slowQueries = append(*slowQueries, *query)
 	}
 }

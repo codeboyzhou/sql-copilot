@@ -29,7 +29,7 @@ type diagnosticMockRow struct{}
 func (row *diagnosticMockRow) Scan(dest ...any) error {
 	// mock the scan result for each field
 	if len(dest) == 12 {
-		// Assign values to each field pointer
+		// assign values to each field pointer
 		if id, ok := dest[0].(*int64); ok {
 			*id = mockExplainResult.ID
 		}
@@ -114,7 +114,7 @@ func TestExplainSQL(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ExplainSQL(%s), got = %v, but want = %v", tt.sql, got, tt.want)
+				t.Errorf("ExplainSQL(%s) failed, got = %v, but want = %v", tt.sql, got, tt.want)
 			}
 		})
 	}

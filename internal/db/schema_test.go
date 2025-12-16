@@ -1,29 +1,35 @@
 package db
 
 import (
+	"reflect"
 	"testing"
 
-	"github.com/codeboyzhou/sql-copilot/strconst"
+	"github.com/codeboyzhou/sql-copilot/internal/db/sql"
 )
 
-const mockCreateTableSQL = `
-    CREATE TABLE table_example_user (
-		id INT PRIMARY KEY,
-		name VARCHAR(255),
-		email VARCHAR(255),
-		age INT,
-		INDEX idx_email (email),
-	)`
+var mockShowCreateTableResult = &ShowCreateTableResult{
+	TableName: "table_example_user",
+	CreateTableSQL: `
+        CREATE TABLE table_example_user (
+		    id INT PRIMARY KEY,
+		    name VARCHAR(255),
+		    email VARCHAR(255),
+		    age INT,
+		    INDEX idx_email (email)
+		)`,
+}
 
 type schemaMockRow struct{}
 
 func (row *schemaMockRow) Scan(dest ...any) error {
-	// mock the scan result
-	if len(dest) > 0 {
-		// dest[0] should be a pointer to string
-		switch value := dest[0].(type) {
-		case *string:
-			*value = mockCreateTableSQL
+	// mock the scan result for each field
+	if len(dest) == 2 {
+		// assign values to each field pointer
+		if tableName, ok := dest[0].(*string); ok {
+			*tableName = mockShowCreateTableResult.TableName
+		}
+		if createTableSQL, ok := dest[1].(*string); ok {
+			*createTableSQL = mockShowCreateTableResult.CreateTableSQL
 		}
 	}
 	return nil
@@ -40,21 +46,21 @@ func TestShowCreateTableSQL(t *testing.T) {
 		name      string
 		querier   Querier
 		tableName string
-		want      string
+		want      *ShowCreateTableResult
 		wantErr   bool
 	}{
 		{
 			name:      "invalid table name",
 			querier:   &schemaMockQuerier{},
 			tableName: "invalid#table#name",
-			want:      strconst.Empty,
+			want:      nil,
 			wantErr:   true,
 		},
 		{
 			name:      "table example user",
 			querier:   &schemaMockQuerier{},
 			tableName: "table_example_user",
-			want:      mockCreateTableSQL,
+			want:      mockShowCreateTableResult,
 			wantErr:   false,
 		},
 	}
@@ -71,8 +77,11 @@ func TestShowCreateTableSQL(t *testing.T) {
 				return
 			}
 
-			if got != tt.want {
-				t.Errorf("ShowCreateTableSQL(%s), got = %s, but want = %s", tt.tableName, got, tt.want)
+			got.CreateTableSQL = sql.NormalizeSQL(got.CreateTableSQL)
+			tt.want.CreateTableSQL = sql.NormalizeSQL(tt.want.CreateTableSQL)
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ShowCreateTableSQL(%s) failed, got = %v, but want = %v", tt.tableName, got, tt.want)
 			}
 		})
 	}

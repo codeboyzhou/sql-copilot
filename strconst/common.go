@@ -6,3 +6,5 @@ const (
 	Space      = " "
 	HashSymbol = "#"
 )
+
+const SpaceRune = ' '

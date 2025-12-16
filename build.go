@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"time"
 )
 
 const TestCoverageDir = "coverage"
@@ -23,6 +24,13 @@ const (
 	GoFumptVersion   = "v0.9.2"
 	GoImportsVersion = "v0.40.0"
 	GolangciVersion  = "v2.7.2"
+)
+
+const (
+	MySQLDockerImage        = "mysql:8.0.44-debian"
+	MySQLTestContainerName  = "mysql-test"
+	MySQLInitTimeoutSeconds = 10
+	MySQLTestDSN            = "root:mysqlroot@tcp(127.0.0.1:3307)/test?parseTime=true"
 )
 
 func main() {
@@ -51,6 +59,8 @@ func main() {
 		}
 		bench := os.Args[2]
 		runBenchmark(bench)
+	case "ci":
+		runIntegrationTest()
 	default:
 		showHelp()
 	}
@@ -188,4 +198,43 @@ func runBenchmark(bench string) {
 		os.Exit(1)
 	}
 	fmt.Printf("%s Benchmark completed successfully\n", EmojiSuccess)
+}
+
+func runIntegrationTest() {
+	fmt.Printf("%s Running integration tests...\n", EmojiRunning)
+
+	fmt.Printf("%s Pulling Docker image %s for MySQL test container...\n", EmojiRunning, MySQLDockerImage)
+	if err := run("docker", "pull", MySQLDockerImage); err != nil {
+		fmt.Printf("%s Error: %v\n", EmojiError, err)
+		os.Exit(1)
+	}
+	fmt.Printf("%s Successfully pulled Docker image %s for MySQL test container\n", EmojiSuccess, MySQLDockerImage)
+
+	fmt.Printf("%s Running MySQL test container...\n", EmojiRunning)
+	if err := run("docker-compose", "-f", "docker-compose.test.yml", "up", "-d"); err != nil {
+		fmt.Printf("%s Error: %v\n", EmojiError, err)
+		os.Exit(1)
+	}
+	fmt.Printf("%s Successfully started MySQL test container: %s\n", EmojiSuccess, MySQLTestContainerName)
+
+	fmt.Printf("%s Waiting %d seconds for MySQL to initialize...\n", EmojiRunning, MySQLInitTimeoutSeconds)
+	time.Sleep(MySQLInitTimeoutSeconds * time.Second)
+
+	fmt.Printf("%s Setting TEST_DB_DSN environment variable...\n", EmojiRunning)
+	os.Setenv("TEST_DB_DSN", MySQLTestDSN)
+	fmt.Printf("%s TEST_DB_DSN set to: %s\n", EmojiSuccess, os.Getenv("TEST_DB_DSN"))
+
+	fmt.Printf("%s Running Go integration tests...\n", EmojiRunning)
+	if err := run("go", "test", "-v", "-tags=integration", "./integration_test/"); err != nil {
+		fmt.Printf("%s Error: %v\n", EmojiError, err)
+		os.Exit(1)
+	}
+	fmt.Printf("%s Successfully completed integration tests\n", EmojiSuccess)
+
+	fmt.Printf("%s Stopping and removing MySQL test container...\n", EmojiRunning)
+	if err := run("docker-compose", "-f", "docker-compose.test.yml", "down"); err != nil {
+		fmt.Printf("%s Error: %v\n", EmojiError, err)
+		os.Exit(1)
+	}
+	fmt.Printf("%s Successfully stopped and removed MySQL test container: %s\n", EmojiSuccess, MySQLTestContainerName)
 }

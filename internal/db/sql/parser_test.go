@@ -3,7 +3,62 @@ package sql
 import (
 	"reflect"
 	"testing"
+
+	"github.com/codeboyzhou/sql-copilot/strconst"
 )
+
+const wantNormalizedSQL = "SELECT * FROM table1 WHERE id = 1"
+
+func TestNormalizeSQL(t *testing.T) {
+	tests := []struct {
+		name string
+		sql  string
+		want string
+	}{
+		{
+			name: "empty sql",
+			sql:  strconst.Empty,
+			want: strconst.Empty,
+		},
+		{
+			name: "normalized sql",
+			sql:  wantNormalizedSQL,
+			want: wantNormalizedSQL,
+		},
+		{
+			name: "sql with multiple spaces and tab spaces at the beginning",
+			sql:  " \t \t SELECT * FROM table1 WHERE id = 1",
+			want: wantNormalizedSQL,
+		},
+		{
+			name: "sql with multiple spaces and tab spaces at the end",
+			sql:  "SELECT * FROM table1 WHERE id = 1 \t \t ",
+			want: wantNormalizedSQL,
+		},
+		{
+			name: "sql with multiple spaces and tab spaces at the beginning and end",
+			sql:  " \t \t SELECT * FROM table1 WHERE id = 1 \t \t ",
+			want: wantNormalizedSQL,
+		},
+		{
+			name: "sql is multiple lines",
+			sql: `
+			    SELECT *
+				FROM table1
+				WHERE id = 1
+			`,
+			want: wantNormalizedSQL,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NormalizeSQL(tt.sql)
+			if got != tt.want {
+				t.Errorf("NormalizeSQL(%s) failed, got = %v, but want = %v", tt.sql, got, tt.want)
+			}
+		})
+	}
+}
 
 func TestExtractTableNames(t *testing.T) {
 	tests := []struct {
@@ -69,7 +124,7 @@ func TestExtractTableNames(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ExtractTableNames(%s), got = %v, but want = %v", tt.sql, got, tt.want)
+				t.Errorf("ExtractTableNames(%s) failed, got = %v, but want = %v", tt.sql, got, tt.want)
 			}
 		})
 	}

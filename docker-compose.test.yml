@@ -1,0 +1,15 @@
+services:
+  mysql-test:
+    image: mysql:8.0.44-debian
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysqlroot
+      MYSQL_DATABASE: test
+    ports:
+      - 3307:3306
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-pmysqlroot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

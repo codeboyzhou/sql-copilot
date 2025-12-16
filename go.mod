@@ -3,6 +3,7 @@ module github.com/codeboyzhou/sql-copilot
 go 1.25.4
 
 require (
+	github.com/go-sql-driver/mysql v1.9.3
 	github.com/golangci/golangci-lint/v2 v2.7.2
 	golang.org/x/tools v0.40.0
 	mvdan.cc/gofumpt v0.9.2
@@ -15,6 +16,7 @@ require (
 	codeberg.org/chavacava/garif v0.2.0 // indirect
 	dev.gaijin.team/go/exhaustruct/v4 v4.0.0 // indirect
 	dev.gaijin.team/go/golib v0.6.0 // indirect
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/4meepo/tagalign v1.4.3 // indirect
 	github.com/Abirdcfly/dupword v0.1.7 // indirect
 	github.com/AdminBenni/iota-mixing v1.0.0 // indirect

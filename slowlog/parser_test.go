@@ -53,7 +53,7 @@ func TestParseSlowLog(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("ParseSlowLog(%s), got = %v, but want = %v", tt.filepath, got, tt.want)
+				t.Errorf("ParseSlowLog(%s) failed, got = %v, but want = %v", tt.filepath, got, tt.want)
 			}
 		})
 	}
