@@ -6,7 +6,7 @@
       "request": "launch",
       "type": "go",
       "mode": "test",
-      "program": "./integration_test",
+      "program": "./integration",
       "buildFlags": "-tags=integration",
       "env": {
         "TEST_DB_DSN": "root:mysqlroot@tcp(127.0.0.1:3307)/test?parseTime=true"

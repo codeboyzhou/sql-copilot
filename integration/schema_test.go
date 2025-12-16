@@ -1,4 +1,3 @@
-// integration_test/schema_test.go
 //go:build integration
 // +build integration
 

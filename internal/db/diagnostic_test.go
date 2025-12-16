@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"reflect"
 	"testing"
 
@@ -13,15 +14,15 @@ var mockExplainResult = ExplainResult{
 	ID:           1,
 	SelectType:   "SIMPLE",
 	Table:        "table_example_user",
-	Partitions:   strconst.Empty,
+	Partitions:   sql.NullString{String: strconst.Empty, Valid: false},
 	Type:         "ALL",
-	PossibleKeys: strconst.Empty,
-	Key:          strconst.Empty,
-	KeyLen:       0,
-	Ref:          strconst.Empty,
+	PossibleKeys: sql.NullString{String: strconst.Empty, Valid: false},
+	Key:          sql.NullString{String: strconst.Empty, Valid: false},
+	KeyLen:       sql.NullInt64{Int64: 0, Valid: false},
+	Ref:          sql.NullString{String: strconst.Empty, Valid: false},
 	Rows:         1,
 	Filtered:     "100.00",
-	Extra:        strconst.Empty,
+	Extra:        sql.NullString{String: strconst.Empty, Valid: false},
 }
 
 type diagnosticMockRow struct{}
@@ -39,22 +40,22 @@ func (row *diagnosticMockRow) Scan(dest ...any) error {
 		if table, ok := dest[2].(*string); ok {
 			*table = mockExplainResult.Table
 		}
-		if partitions, ok := dest[3].(*string); ok {
+		if partitions, ok := dest[3].(*sql.NullString); ok {
 			*partitions = mockExplainResult.Partitions
 		}
 		if type_, ok := dest[4].(*string); ok {
 			*type_ = mockExplainResult.Type
 		}
-		if possibleKeys, ok := dest[5].(*string); ok {
+		if possibleKeys, ok := dest[5].(*sql.NullString); ok {
 			*possibleKeys = mockExplainResult.PossibleKeys
 		}
-		if key, ok := dest[6].(*string); ok {
+		if key, ok := dest[6].(*sql.NullString); ok {
 			*key = mockExplainResult.Key
 		}
-		if keyLen, ok := dest[7].(*int64); ok {
+		if keyLen, ok := dest[7].(*sql.NullInt64); ok {
 			*keyLen = mockExplainResult.KeyLen
 		}
-		if ref, ok := dest[8].(*string); ok {
+		if ref, ok := dest[8].(*sql.NullString); ok {
 			*ref = mockExplainResult.Ref
 		}
 		if rows, ok := dest[9].(*int64); ok {
@@ -63,7 +64,7 @@ func (row *diagnosticMockRow) Scan(dest ...any) error {
 		if filtered, ok := dest[10].(*string); ok {
 			*filtered = mockExplainResult.Filtered
 		}
-		if extra, ok := dest[11].(*string); ok {
+		if extra, ok := dest[11].(*sql.NullString); ok {
 			*extra = mockExplainResult.Extra
 		}
 	}

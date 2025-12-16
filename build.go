@@ -226,7 +226,7 @@ func runIntegrationTest() {
 	fmt.Printf("%s TEST_DB_DSN set to: %s\n", EmojiSuccess, os.Getenv("TEST_DB_DSN"))
 
 	fmt.Printf("%s Running Go integration tests...\n", EmojiRunning)
-	if err := run("go", "test", "-v", "-tags=integration", "./integration_test/"); err != nil {
+	if err := run("go", "test", "-v", "-tags=integration", "./integration/"); err != nil {
 		fmt.Printf("%s Error: %v\n", EmojiError, err)
 		os.Exit(1)
 	}

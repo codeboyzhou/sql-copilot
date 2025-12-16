@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/codeboyzhou/sql-copilot/strconst"
@@ -10,15 +11,15 @@ type ExplainResult struct {
 	ID           int64
 	SelectType   string
 	Table        string
-	Partitions   string
+	Partitions   sql.NullString
 	Type         string
-	PossibleKeys string
-	Key          string
-	KeyLen       int64
-	Ref          string
+	PossibleKeys sql.NullString
+	Key          sql.NullString
+	KeyLen       sql.NullInt64
+	Ref          sql.NullString
 	Rows         int64
 	Filtered     string
-	Extra        string
+	Extra        sql.NullString
 }
 
 func ExplainSQL(querier Querier, sql string, args ...any) (result *ExplainResult, err error) {
