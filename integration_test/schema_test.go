@@ -2,7 +2,7 @@
 //go:build integration
 // +build integration
 
-package integration_test
+package integration
 
 import (
 	"os"
@@ -11,6 +11,8 @@ import (
 	"github.com/codeboyzhou/sql-copilot/internal/db"
 	"github.com/codeboyzhou/sql-copilot/strconst"
 )
+
+const wantTableName = "sale"
 
 func TestShowCreateTableSQL(t *testing.T) {
 	dsn := os.Getenv("TEST_DB_DSN")
@@ -22,14 +24,16 @@ func TestShowCreateTableSQL(t *testing.T) {
 	defer dbConnection.Close()
 
 	querier := db.NewQuerier(dbConnection)
-	result, err := db.ShowCreateTableSQL(querier, "sale")
+	result, err := db.ShowCreateTableSQL(querier, wantTableName)
 	if err != nil {
 		t.Fatalf("Failed to show create table SQL: %v", err)
 	}
-	if result.TableName != "sale" {
-		t.Errorf("Expected table name 'sale', but got '%s'", result.TableName)
+
+	if result.TableName != wantTableName {
+		t.Errorf("TestShowCreateTableSQL(%s) failed, got table name = %s, but want %s", wantTableName, result.TableName, wantTableName)
 	}
+
 	if result.CreateTableSQL == strconst.Empty {
-		t.Errorf("Expected non-empty create table SQL, but got empty string")
+		t.Errorf("TestShowCreateTableSQL(%s) failed, got create table SQL = %s, but want non-empty string", wantTableName, result.CreateTableSQL)
 	}
 }

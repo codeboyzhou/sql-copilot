@@ -1,11 +1,11 @@
 services:
   mysql-test:
     image: mysql:8.0.44-debian
-    command: --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: mysqlroot
-      MYSQL_DATABASE: test
+    volumes:
+      - ./integration_test/testdata/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 3307:3306
     healthcheck:

@@ -1,5 +1,5 @@
-//go:build tools
-// +build tools
+//go:build build
+// +build build
 
 package main
 
@@ -28,6 +28,7 @@ const (
 
 const (
 	MySQLDockerImage        = "mysql:8.0.44-debian"
+	DockerComposeTestFile   = "docker-compose.test.yml"
 	MySQLTestContainerName  = "mysql-test"
 	MySQLInitTimeoutSeconds = 10
 	MySQLTestDSN            = "root:mysqlroot@tcp(127.0.0.1:3307)/test?parseTime=true"
@@ -211,7 +212,7 @@ func runIntegrationTest() {
 	fmt.Printf("%s Successfully pulled Docker image %s for MySQL test container\n", EmojiSuccess, MySQLDockerImage)
 
 	fmt.Printf("%s Running MySQL test container...\n", EmojiRunning)
-	if err := run("docker-compose", "-f", "docker-compose.test.yml", "up", "-d"); err != nil {
+	if err := run("docker-compose", "-f", DockerComposeTestFile, "up", "-d"); err != nil {
 		fmt.Printf("%s Error: %v\n", EmojiError, err)
 		os.Exit(1)
 	}
@@ -232,7 +233,7 @@ func runIntegrationTest() {
 	fmt.Printf("%s Successfully completed integration tests\n", EmojiSuccess)
 
 	fmt.Printf("%s Stopping and removing MySQL test container...\n", EmojiRunning)
-	if err := run("docker-compose", "-f", "docker-compose.test.yml", "down"); err != nil {
+	if err := run("docker-compose", "-f", DockerComposeTestFile, "down"); err != nil {
 		fmt.Printf("%s Error: %v\n", EmojiError, err)
 		os.Exit(1)
 	}
