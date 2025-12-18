@@ -1,10 +1,11 @@
 package strconst
 
 const (
-	DOT        = "."
 	Empty      = ""
 	Space      = " "
+	DOT        = "."
 	HashSymbol = "#"
+	NewLine    = "\n"
 )
 
 const SpaceRune = ' '

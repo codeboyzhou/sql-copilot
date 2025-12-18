@@ -1,5 +1,3 @@
 package strconst
 
-const (
-	MySQLDriverName = "mysql"
-)
+const MySQLDriverName = "mysql"
