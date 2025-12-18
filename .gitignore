@@ -1,2 +1,5 @@
 # Go test coverage files
 coverage/
+
+# Environment variables
+.env
