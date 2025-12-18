@@ -36,7 +36,7 @@ func (c *OpenAICompatibleClient) SendMessage(message string) string {
 
 	ctx := context.TODO()
 	messages := []openai.ChatCompletionMessageParamUnion{
-		openai.SystemMessage("You are a helpful assistant."),
+		openai.SystemMessage(SystemPrompt),
 		openai.UserMessage(message),
 	}
 	body := openai.ChatCompletionNewParams{
